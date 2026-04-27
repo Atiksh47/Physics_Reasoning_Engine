@@ -1,0 +1,41 @@
+{
+  "name": "Gentle ramp — ball barely reaches heavy block",
+  "gravity": [0, -9.8],
+  "damping": 0.99,
+  "duration": 8.0,
+  "steps_per_second": 120,
+  "objects": [
+    {
+      "type": "ball",
+      "name": "ball",
+      "position": [1.0, 5.0],
+      "radius": 0.4,
+      "mass": 1.0,
+      "elasticity": 0.4,
+      "friction": 0.4
+    },
+    {
+      "type": "slope",
+      "name": "slope",
+      "start": [0.0, 4.5],
+      "end": [9.0, 1.5],
+      "friction": 0.5,
+      "elasticity": 0.2
+    },
+    {
+      "type": "block",
+      "name": "block",
+      "position": [8.5, 2.5],
+      "size": [1.5, 1.5],
+      "mass": 20.0,
+      "elasticity": 0.1,
+      "friction": 0.8
+    },
+    {
+      "type": "wall",
+      "name": "floor",
+      "start": [-1.0, 1.0],
+      "end": [13.0, 1.0]
+    }
+  ]
+}

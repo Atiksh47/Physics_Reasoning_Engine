@@ -1,0 +1,41 @@
+{
+  "name": "Ball on slope hits block",
+  "gravity": [0, -9.8],
+  "damping": 0.99,
+  "duration": 5.0,
+  "steps_per_second": 120,
+  "objects": [
+    {
+      "type": "ball",
+      "name": "ball",
+      "position": [1.0, 8.0],
+      "radius": 0.4,
+      "mass": 1.0,
+      "elasticity": 0.6,
+      "friction": 0.3
+    },
+    {
+      "type": "slope",
+      "name": "slope",
+      "start": [0.0, 6.0],
+      "end": [7.0, 1.5],
+      "friction": 0.3,
+      "elasticity": 0.3
+    },
+    {
+      "type": "block",
+      "name": "block",
+      "position": [7.5, 2.5],
+      "size": [1.2, 1.2],
+      "mass": 3.0,
+      "elasticity": 0.3,
+      "friction": 0.5
+    },
+    {
+      "type": "wall",
+      "name": "floor",
+      "start": [-1.0, 1.0],
+      "end": [12.0, 1.0]
+    }
+  ]
+}
