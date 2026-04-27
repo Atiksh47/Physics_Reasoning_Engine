@@ -1,5 +1,10 @@
 import json
+import os
 import sys
+
+if __name__ == "__main__":
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import pymunk
 from physics.scene_loader import load_scene
 from physics.events import attach_collision_handlers
@@ -20,10 +25,15 @@ def run_simulation(scene: dict) -> dict:
     sample_every = max(1, steps_per_second // 10)
 
     trajectories = {name: [] for name in bodies}
+    peak_velocities = {name: 0.0 for name in bodies}
 
     for i in range(total_steps):
         current_time["t"] = i * dt
         space.step(dt)
+        for name, body in bodies.items():
+            speed = body.velocity.length
+            if speed > peak_velocities[name]:
+                peak_velocities[name] = speed
         if i % sample_every == 0:
             for name, body in bodies.items():
                 trajectories[name].append([
@@ -36,14 +46,18 @@ def run_simulation(scene: dict) -> dict:
         final_states[name] = {
             "position": [round(body.position.x, 3), round(body.position.y, 3)],
             "velocity": [round(body.velocity.x, 3), round(body.velocity.y, 3)],
+            "peak_velocity": round(peak_velocities[name], 4),
         }
 
-    return {
+    result = {
         "duration": duration,
         "collisions": collision_log,
         "final_states": final_states,
         "trajectories": trajectories,
     }
+    if "queries" in scene:
+        result["queries"] = scene["queries"]
+    return result
 
 
 if __name__ == "__main__":

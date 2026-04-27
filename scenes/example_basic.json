@@ -8,7 +8,7 @@
     {
       "type": "ball",
       "name": "ball",
-      "position": [1.0, 8.0],
+      "position": [1.0, 6.5],
       "radius": 0.4,
       "mass": 1.0,
       "elasticity": 0.6,
@@ -25,7 +25,7 @@
     {
       "type": "block",
       "name": "block",
-      "position": [7.5, 2.5],
+      "position": [7.5, 1.62],
       "size": [1.2, 1.2],
       "mass": 3.0,
       "elasticity": 0.3,

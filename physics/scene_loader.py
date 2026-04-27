@@ -28,7 +28,7 @@ def load_scene(space, scene: dict) -> dict:
             )
             bodies[name] = body
 
-        elif t == "slope":
+        elif t in ("slope", "ramp"):
             add_slope(
                 space,
                 start=tuple(obj["start"]),
