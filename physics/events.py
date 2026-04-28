@@ -1,7 +1,7 @@
 import pymunk
 
 
-def attach_collision_handlers(space, collision_log, current_time):
+def attach_collision_handlers(space, collision_log, current_time, duration=5.0):
     seen = set()
 
     def post_solve(arbiter, space, data):
@@ -11,7 +11,8 @@ def attach_collision_handlers(space, collision_log, current_time):
         if label_a is None or label_b is None:
             return
         key = tuple(sorted((label_a, label_b)))
-        if key not in seen and current_time["t"] > 0.05:
+        startup_grace = min(0.05, duration * 0.01)
+        if key not in seen and current_time["t"] > startup_grace:
             seen.add(key)
             collision_log.append({
                 "objects": list(key),

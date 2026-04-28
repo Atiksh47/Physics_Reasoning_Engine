@@ -42,21 +42,28 @@ def _call_model(user_input: str, extra_instruction: str = "") -> str:
     prompt = user_input
     if extra_instruction:
         prompt = f"{extra_instruction}\n\n{user_input}"
-    response = ollama.chat(
-        model=MODEL,
-        messages=[
-            {"role": "system", "content": SCENE_PARSER_SYSTEM},
-            {"role": "user", "content": prompt},
-        ],
-    )
+    try:
+        response = ollama.chat(
+            model=MODEL,
+            messages=[
+                {"role": "system", "content": SCENE_PARSER_SYSTEM},
+                {"role": "user", "content": prompt},
+            ],
+        )
+    except Exception as e:
+        raise RuntimeError(
+            f"Could not reach Ollama ({e}).\n"
+            "Make sure Ollama is running: `ollama serve`\n"
+            f"And the model is available: `ollama pull {MODEL}`"
+        ) from e
     return response["message"]["content"]
 
 
 def _snap_balls_to_slopes(scene: dict) -> dict:
     """
-    For each ball, find any slope whose x-range contains the ball's x position
-    and move the ball to sit just above that slope surface.
-    This corrects the common model error of placing balls slightly inside slopes.
+    For each ball, find the nearest slope and move the ball to sit just above
+    the slope surface using the true perpendicular (normal) offset.
+    Handles all slope angles including steep/near-vertical ones.
     """
     slopes = [o for o in scene["objects"] if o["type"] in ("slope", "ramp")]
     for obj in scene["objects"]:
@@ -64,23 +71,36 @@ def _snap_balls_to_slopes(scene: dict) -> dict:
             continue
         bx, by = obj["position"]
         radius = obj.get("radius", 0.5)
+        best = None  # (signed_dist, normal_x, normal_y, closest_x, closest_y)
         for slope in slopes:
             sx, sy = slope["start"]
             ex, ey = slope["end"]
-            x_min, x_max = min(sx, ex), max(sx, ex)
-            if not (x_min <= bx <= x_max):
-                continue
-            # y on slope line at ball's x
-            t = (bx - sx) / (ex - sx) if ex != sx else 0.0
-            slope_y = sy + t * (ey - sy)
-            # Perpendicular offset: raise ball by radius / cos(angle)
+            # Segment vector and length
             dx, dy = ex - sx, ey - sy
-            length = math.hypot(dx, dy)
-            cos_a = abs(dx) / length if length > 0 else 1.0
-            offset = radius / cos_a if cos_a > 0.1 else radius * 1.5
-            target_y = slope_y + offset + 0.05  # small gap so it doesn't start embedded
-            if by < target_y:
-                obj["position"] = [bx, round(target_y, 3)]
+            seg_len = math.hypot(dx, dy)
+            if seg_len < 1e-9:
+                continue
+            # Project ball onto the segment (clamped)
+            t = max(0.0, min(1.0, ((bx - sx) * dx + (by - sy) * dy) / (seg_len ** 2)))
+            cx, cy = sx + t * dx, sy + t * dy
+            # Distance from ball center to closest point on segment
+            dist = math.hypot(bx - cx, by - cy)
+            # Outward normal: rotate segment 90° counter-clockwise (y-up world)
+            nx, ny = -dy / seg_len, dx / seg_len
+            # Signed distance along normal (positive = ball is above slope surface)
+            signed = (bx - cx) * nx + (by - cy) * ny
+            if best is None or dist < best[0]:
+                best = (dist, nx, ny, cx, cy, signed)
+        if best is None:
+            continue
+        _, nx, ny, cx, cy, signed = best
+        # Required signed distance for ball center to sit just above slope
+        target_dist = radius + 0.05
+        if signed < target_dist:
+            # Move ball along the normal to the correct position
+            new_x = cx + nx * target_dist
+            new_y = cy + ny * target_dist
+            obj["position"] = [round(new_x, 3), round(new_y, 3)]
     return scene
 
 
