@@ -20,6 +20,7 @@ def load_scene(space, scene: dict) -> dict:
         if t == "ball":
             body, _ = add_ball(
                 space,
+                name=name,
                 position=tuple(obj["position"]),
                 radius=obj.get("radius", 0.5),
                 mass=obj.get("mass", 1.0),
@@ -31,6 +32,7 @@ def load_scene(space, scene: dict) -> dict:
         elif t in ("slope", "ramp"):
             add_slope(
                 space,
+                name=name,
                 start=tuple(obj["start"]),
                 end=tuple(obj["end"]),
                 friction=obj.get("friction", 0.4),
@@ -40,6 +42,7 @@ def load_scene(space, scene: dict) -> dict:
         elif t == "block":
             body, _ = add_block(
                 space,
+                name=name,
                 position=tuple(obj["position"]),
                 size=tuple(obj.get("size", [1.0, 1.0])),
                 mass=obj.get("mass", 5.0),
@@ -52,6 +55,7 @@ def load_scene(space, scene: dict) -> dict:
         elif t == "wall":
             add_wall(
                 space,
+                name=name,
                 start=tuple(obj["start"]),
                 end=tuple(obj["end"]),
                 friction=obj.get("friction", 0.5),

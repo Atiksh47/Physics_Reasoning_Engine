@@ -28,8 +28,8 @@ def run_simulation(scene: dict) -> dict:
     peak_velocities = {name: 0.0 for name in bodies}
 
     for i in range(total_steps):
-        current_time["t"] = i * dt
         space.step(dt)
+        current_time["t"] = (i + 1) * dt
         for name, body in bodies.items():
             speed = body.velocity.length
             if speed > peak_velocities[name]:

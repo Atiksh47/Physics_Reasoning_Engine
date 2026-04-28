@@ -1,0 +1,50 @@
+{
+  "name": "Rolling Ball Down a Hill",
+  "gravity": [
+    0,
+    -9.8
+  ],
+  "damping": 0.99,
+  "duration": 5.0,
+  "steps_per_second": 120,
+  "objects": [
+    {
+      "type": "wall",
+      "name": "floor",
+      "start": [
+        -1,
+        1
+      ],
+      "end": [
+        20,
+        1
+      ]
+    },
+    {
+      "type": "ball",
+      "name": "rolling_ball",
+      "position": [
+        2,
+        5.077
+      ],
+      "radius": 0.5,
+      "mass": 1.0,
+      "elasticity": 0.6,
+      "friction": 0.3
+    },
+    {
+      "type": "slope",
+      "name": "hill_slope",
+      "start": [
+        2,
+        4.5
+      ],
+      "end": [
+        8,
+        2.5
+      ],
+      "friction": 0.4,
+      "elasticity": 0.3
+    }
+  ]
+}
