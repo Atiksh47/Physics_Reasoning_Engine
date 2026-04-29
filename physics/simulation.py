@@ -16,9 +16,8 @@ def run_simulation(scene: dict) -> dict:
     current_time = {"t": 0.0}
 
     bodies = load_scene(space, scene)
-    attach_collision_handlers(space, collision_log, current_time, duration)
-
     duration = scene.get("duration", 5.0)
+    attach_collision_handlers(space, collision_log, current_time, duration)
     steps_per_second = scene.get("steps_per_second", 120)
     dt = 1.0 / steps_per_second
     total_steps = int(duration * steps_per_second)

@@ -33,6 +33,16 @@ def main():
     for c in collisions:
         print(f"  {' + '.join(c['objects'])}  @ t={c['time']}s  impulse={c['impact_impulse']} N·s")
 
+    try:
+        from ai.explainer import generate_explanation, answer_query
+        print("\n--- Explanation ---")
+        print(generate_explanation(scene, result))
+        for q in scene.get("queries", []):
+            print(f"\nQ: {q}")
+            print(f"A: {answer_query(scene, result, q)}")
+    except Exception as e:
+        print(f"(Explanation unavailable: {e})")
+
     Renderer(scene, result).run()
 
 
