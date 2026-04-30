@@ -84,6 +84,51 @@ def answer_query(scene: dict, result: dict, question: str) -> str:
     return _call_model(_build_user_prompt(scene, result, question=question))
 
 
+def check_consistency(result: dict, explanation: str) -> list[str]:
+    """
+    Programmatically cross-check an explanation against simulation data.
+    Returns a list of discrepancy strings (empty list = no issues found).
+
+    Checks:
+    - Whether the explanation mentions/omits collision when data says otherwise
+    - Whether any object names present in the result are missing from the explanation
+    """
+    issues = []
+
+    collisions = result.get("collisions", [])
+    has_collision = len(collisions) > 0
+
+    lower = explanation.lower()
+    mentions_collision = any(w in lower for w in ("collid", "hit", "impact", "struck", "crash"))
+    mentions_no_collision = any(
+        phrase in lower
+        for phrase in ("no collision", "did not hit", "never hit", "does not hit",
+                       "didn't hit", "no impact", "missed")
+    )
+
+    if has_collision and mentions_no_collision:
+        objects = " + ".join(collisions[0]["objects"])
+        t = collisions[0]["time"]
+        issues.append(
+            f"Explanation says no collision occurred, but simulation recorded a collision "
+            f"between {objects} at t={t:.2f}s."
+        )
+    elif not has_collision and mentions_collision and not mentions_no_collision:
+        issues.append(
+            "Explanation implies a collision occurred, but simulation recorded none."
+        )
+
+    # Check that every dynamic object in the result is mentioned by name
+    dynamic_names = list(result.get("final_states", {}).keys())
+    for name in dynamic_names:
+        if name.lower() not in lower:
+            issues.append(
+                f"Explanation does not mention object '{name}', which appears in the simulation result."
+            )
+
+    return issues
+
+
 if __name__ == "__main__":
     import sys
 
